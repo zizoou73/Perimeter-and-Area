@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>مسابقة الرياضيات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('images/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 800px;
+            animation: fadeIn 2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .question img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: contain;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .options li {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .options li img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .options li:hover img {
+            transform: scale(1.1);
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            background: #0078d7;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .button-container button:hover {
+            background: #005a9c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="quiz-container">
+        <div class="header">مسابقة الرياضيات</div>
+        <div class="question-counter" id="question-counter">السؤال 1 من 6</div>
+        <div class="question" id="question"></div>
+        <ul class="options" id="options"></ul>
+        <div class="button-container">
+            <button onclick="restartQuiz()">إعادة المسابقة</button>
+        </div>
+    </div>
+    <audio id="correct-sound" src="sounds/success.mp3"></audio>
+    <audio id="wrong-sound" src="sounds/error.mp3"></audio>
+    <script>
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let questions = [
+            { questionImage: "images/question1.png", options: ["images/q1_answer1.png", "images/q1_answer2.png", "images/q1_answer3.png", "images/q1_answer4.png"], correctIndex: 2 },
+            { questionImage: "images/question2.png", options: ["images/q2_answer1.png", "images/q2_answer2.png"], correctIndex: 0 },
+            { questionImage: "images/question3.png", options: ["images/q3_answer1.png", "images/q3_answer2.png", "images/q3_answer3.png", "images/q3_answer4.png"], correctIndex: 3 },
+            { questionImage: "images/question4.png", options: ["images/q4_answer1.png", "images/q4_answer2.png", "images/q4_answer3.png", "images/q4_answer4.png"], correctIndex: 0 },
+            { questionImage: "images/question5.png", options: ["images/q5_answer1.png", "images/q5_answer2.png", "images/q5_answer3.png", "images/q5_answer4.png"], correctIndex: 1 },
+            { questionImage: "images/question6.png", options: ["images/q6_answer1.png", "images/q6_answer2.png", "images/q6_answer3.png", "images/q6_answer4.png"], correctIndex: 0 },
+        ];
+        questions = shuffleArray(questions);
+        let currentQuestion = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                localStorage.setItem('quizScore', score);
+                window.location.href = 'result.html';
+                return;
+            }
+            const questionElement = document.getElementById('question');
+            const optionsElement = document.getElementById('options');
+            document.getElementById('question-counter').textContent = `السؤال ${currentQuestion + 1} من ${questions.length}`;
+            let question = questions[currentQuestion];
+            questionElement.innerHTML = `<img src="${question.questionImage}" alt="Question">`;
+            optionsElement.innerHTML = '';
+            
+            let shuffledOptions = question.options.map((option, index) => ({ option, index }));
+            shuffledOptions = shuffleArray(shuffledOptions);
+            
+            shuffledOptions.forEach(({ option, index }) => {
+                let li = document.createElement('li');
+                li.innerHTML = `<img src="${option}" alt="Option">`;
+                li.onclick = () => checkAnswer(index === question.correctIndex);
+                optionsElement.appendChild(li);
+            });
+        }
+
+        function checkAnswer(isCorrect) {
+            document.getElementById(isCorrect ? 'correct-sound' : 'wrong-sound').play();
+            if (isCorrect) score++;
+            currentQuestion++;
+            setTimeout(loadQuestion, 1000);
+        }
+
+        function restartQuiz() {
+            localStorage.removeItem('quizScore');
+            window.location.href = 'المسابقة.html';
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
